@@ -13,9 +13,7 @@ const DEFAULT_CV = {
   education: [],
   experience: [],
   skills: {
-    languages: [],
-    frameworks: [],
-    tools: []
+    languages: []
   },
   projects: []
 };
@@ -146,9 +144,7 @@ function renderTemplate(template, cv) {
       summary: escapeLatexMultiline(cv.personal.summary)
     },
     skills: {
-      languages: (cv.skills.languages || []).map(escapeLatex).join(", "),
-      frameworks: (cv.skills.frameworks || []).map(escapeLatex).join(", "),
-      tools: (cv.skills.tools || []).map(escapeLatex).join(", ")
+      languages: (cv.skills.languages || []).map(escapeLatex).join(", ")
     },
     contact_line: buildContactLine(cv.personal),
     experience_block: buildExperienceBlock(cv.experience),
@@ -232,9 +228,7 @@ createApp({
       pdfBytes: null,
       pdfUrl: "",
       skillDrafts: {
-        languages: "",
-        frameworks: "",
-        tools: ""
+        languages: ""
       }
     };
   },

@@ -226,49 +226,16 @@
 
           <h2>Skills</h2>
           <div class="card">
-            <div class="skill-block">
-              <p class="label">Data and Reporting</p>
-              <div class="chips">
-                <div class="chip-input">
-                  <input v-model="skillDrafts.languages" placeholder="Add skill" />
-                  <button class="btn mini" type="button" @click="addSkill('languages')">
-                    Add
-                  </button>
-                </div>
-                <div class="chip" v-for="(s, sIdx) in cv.skills.languages" :key="sIdx">
-                  <span>{{ s }}</span>
-                  <button class="chip-x" type="button" @click="removeSkill('languages', sIdx)">x</button>
-                </div>
+            <div class="chips">
+              <div class="chip-input">
+                <input v-model="skillDrafts.languages" placeholder="Add skill" />
+                <button class="btn mini" type="button" @click="addSkill('languages')">
+                  Add
+                </button>
               </div>
-            </div>
-            <div class="skill-block">
-              <p class="label">Digital and Communication</p>
-              <div class="chips">
-                <div class="chip-input">
-                  <input v-model="skillDrafts.frameworks" placeholder="Add skill" />
-                  <button class="btn mini" type="button" @click="addSkill('frameworks')">
-                    Add
-                  </button>
-                </div>
-                <div class="chip" v-for="(s, sIdx) in cv.skills.frameworks" :key="sIdx">
-                  <span>{{ s }}</span>
-                  <button class="chip-x" type="button" @click="removeSkill('frameworks', sIdx)">x</button>
-                </div>
-              </div>
-            </div>
-            <div class="skill-block">
-              <p class="label">Tools</p>
-              <div class="chips">
-                <div class="chip-input">
-                  <input v-model="skillDrafts.tools" placeholder="Add tool" />
-                  <button class="btn mini" type="button" @click="addSkill('tools')">
-                    Add
-                  </button>
-                </div>
-                <div class="chip" v-for="(s, sIdx) in cv.skills.tools" :key="sIdx">
-                  <span>{{ s }}</span>
-                  <button class="chip-x" type="button" @click="removeSkill('tools', sIdx)">x</button>
-                </div>
+              <div class="chip" v-for="(s, sIdx) in cv.skills.languages" :key="sIdx">
+                <span>{{ s }}</span>
+                <button class="chip-x" type="button" @click="removeSkill('languages', sIdx)">x</button>
               </div>
             </div>
           </div>
@@ -332,9 +299,7 @@
 {{{projects_block}}}
 
 \cvsection{Core Skills}
-\cvskillline{Data and Reporting}{{{skills.languages}}}
-\cvskillline{Digital and Communication}{{{skills.frameworks}}}
-\cvskillline{Tools}{{{skills.tools}}}
+{{{skills.languages}}}
 
 \end{document}
     </script>
