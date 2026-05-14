@@ -285,12 +285,10 @@ This project is licensed under the **MIT License** — see the [LICENSE](LICENSE
 ## 🙏 Acknowledgements
 
 - [latexonline.cc](https://latexonline.cc) — free LaTeX compilation API
-- [Vue.js](https://vuejs.org/) — reactive UI framework
-- [Inter Font](https://rsms.me/inter/) — UI typography
 - [LaTeX Project](https://www.latex-project.org/) — document typesetting system
 
 ---
 
 <div align="center">
-  <sub>Built with ❤️ by <a href="https://github.com/notavishek">notavishek</a></sub>
+  <sub>Built by <a href="https://github.com/notavishek">notavishek</a></sub>
 </div>
