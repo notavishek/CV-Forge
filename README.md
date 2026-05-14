@@ -6,6 +6,7 @@
     <img src="https://img.shields.io/badge/Python-3.8+-blue?logo=python&logoColor=white" />
     <img src="https://img.shields.io/badge/Vue.js-3-42b883?logo=vue.js&logoColor=white" />
     <img src="https://img.shields.io/badge/LaTeX-Online-008080?logo=latex&logoColor=white" />
+    <img src="https://img.shields.io/badge/Deployed%20on-Render-46E3B7?logo=render&logoColor=white" />
     <img src="https://img.shields.io/badge/License-MIT-yellow" />
   </p>
 </div>
@@ -48,6 +49,7 @@ CV-Forge/
 ├── app.js              # Vue 3 application logic — data model, template renderer, compile & download
 ├── styles.css          # All UI styles (CSS custom properties, responsive grid)
 ├── server.py           # Local proxy server — serves static files + /api/compile endpoint
+├── render.yaml         # Render.com deployment configuration
 ├── template.tex        # Standalone LaTeX template (used as fallback if inline template is removed)
 ├── requirements.txt    # No pip dependencies (stdlib only)
 ├── schema.json         # CV data schema reference
@@ -94,6 +96,45 @@ Press Ctrl+C to stop.
 Navigate to **[http://localhost:3000](http://localhost:3000)**
 
 > ⚠️ **Do not open `index.html` directly as a `file://` URL.** The compile API will not work without the proxy server. Always use `http://localhost:3000`.
+
+---
+
+## ☁️ Deploy on Render
+
+CV Forge can be deployed as a public web service on [Render](https://render.com) with zero configuration — the `render.yaml` in the repo handles everything.
+
+### One-time Setup
+
+1. Go to [render.com](https://render.com) and sign in
+2. Click **New → Web Service**
+3. Connect your GitHub account and select the `CV-Forge` repository
+4. Render will auto-detect `render.yaml` and pre-fill all settings:
+
+| Field | Value |
+|---|---|
+| **Runtime** | Python 3 |
+| **Build Command** | `pip install --upgrade pip` |
+| **Start Command** | `python server.py` |
+| **Instance Type** | Free |
+
+5. Skip the **Environment Variables** section — `PORT` is injected automatically by Render
+6. Click **Create Web Service**
+
+Your app will be live at `https://cv-forge-xxxx.onrender.com` within a couple of minutes.
+
+### Auto-Deploy on Push
+
+Every time you push to the `main` branch, Render automatically redeploys:
+
+```
+git add .
+git commit -m "your changes"
+git push  →  Render detects push  →  Rebuilds & restarts  →  Live in ~1–2 min
+```
+
+### ⚠️ Free Tier — Cold Start
+
+On the free plan, the service **spins down after ~15 minutes of inactivity**. The next visitor will experience a ~30–50 second cold start. Upgrade to a paid plan ($7/mo) to keep it always-on.
 
 ---
 
@@ -149,9 +190,7 @@ The LaTeX template lives in two places:
 | `{{experience_block}}` | Full experience section (rendered LaTeX) |
 | `{{education_block}}` | Full education section (rendered LaTeX) |
 | `{{projects_block}}` | Full projects section (rendered LaTeX) |
-| `{{skills.languages}}` | Comma-separated list — "Data and Reporting" group |
-| `{{skills.frameworks}}` | Comma-separated list — "Digital and Communication" group |
-| `{{skills.tools}}` | Comma-separated list — "Tools" group |
+| `{{skills.languages}}` | Comma-separated list of all skills |
 
 ### Custom LaTeX Commands (from `cv.sty`)
 
