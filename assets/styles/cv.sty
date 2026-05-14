@@ -1,0 +1,39 @@
+\ProvidesPackage{cv}
+\RequirePackage{titlesec}
+\RequirePackage{xcolor}
+\RequirePackage{enumitem}
+
+\definecolor{cvaccent}{HTML}{0F4C81}
+\definecolor{cvlink}{HTML}{1B6AC9}
+
+\titleformat{\section}
+  {\large\bfseries\color{cvaccent}}
+  {}
+  {0em}
+  {}
+  [\titlerule]
+
+\setlist[itemize]{noitemsep, topsep=2pt, leftmargin=1.2em}
+
+\newcommand{\cvheader}[3]{%
+  {\LARGE \textbf{#1}}\\
+  {\large #2}\\
+  {\small #3}
+}
+
+\newcommand{\cvsection}[1]{\section*{#1}}
+
+\newcommand{\cvsubheading}[4]{%
+  \textbf{#1} --- #2 \hfill #4\\
+  {\textit{#3}}\\[-2pt]
+}
+
+\newcommand{\cvproject}[3]{%
+  \textbf{#1}\\
+  #2\\
+  {\small #3}
+}
+
+\newcommand{\cvskillline}[2]{%
+  \textbf{#1}: #2\\
+}

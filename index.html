@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CV Forge - LaTeX CV Builder</title>
+    <link rel="icon" type="image/png" href="CV forge logo.png" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="ambient" aria-hidden="true"></div>
+    <div id="app" class="app">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">LaTeX Online Compiler</p>
+          <div class="brand">
+            <img src="CV forge logo.png" alt="CV Forge Logo" class="brand-logo" />
+            <h1>CV Forge</h1>
+          </div>
+          <p class="subtitle">
+            Craft a professional CV, compile it locally in the browser, and export
+            as PDF.
+          </p>
+        </div>
+        <div class="actions">
+          <button
+            class="btn primary"
+            type="button"
+            @click="compilePdf"
+            :disabled="isCompiling || !templateTex"
+          >
+            <span v-if="!isCompiling">Compile PDF</span>
+            <span v-else>Compiling...</span>
+          </button>
+          <button
+            class="btn ghost"
+            type="button"
+            @click="downloadPdf"
+            :disabled="!pdfBytes"
+          >
+            Download PDF
+          </button>
+        </div>
+      </header>
+
+      <main class="layout">
+        <section class="panel form-panel">
+          <h2>Personal</h2>
+          <div class="grid two">
+            <label>
+              Full Name
+              <input v-model="cv.personal.name" placeholder="Md. Tanjimul Kabir" />
+            </label>
+            <label>
+              Title
+              <input v-model="cv.personal.title" placeholder="Data Analyst" />
+            </label>
+            <label>
+              Email
+              <input v-model="cv.personal.email" placeholder="name@example.com" />
+            </label>
+            <label>
+              Phone
+              <input v-model="cv.personal.phone" placeholder="+880" />
+            </label>
+            <label>
+              Location
+              <input v-model="cv.personal.location" placeholder="Dhaka, Bangladesh" />
+            </label>
+            <label>
+              Website
+              <input v-model="cv.personal.website" placeholder="portfolio.example" />
+            </label>
+            <label>
+              LinkedIn
+              <input v-model="cv.personal.linkedin" placeholder="linkedin.com/in/name" />
+            </label>
+            <label>
+              GitHub
+              <input v-model="cv.personal.github" placeholder="github.com/name" />
+            </label>
+          </div>
+          <label>
+            Summary
+            <textarea
+              v-model="cv.personal.summary"
+              rows="4"
+              placeholder="2-3 lines that capture your impact."
+            ></textarea>
+          </label>
+
+          <h2>Experience</h2>
+          <div class="list">
+            <article class="card" v-for="(exp, idx) in cv.experience" :key="idx">
+              <div class="row">
+                <label>
+                  Role
+                  <input v-model="exp.role" placeholder="Junior Executive" />
+                </label>
+                <label>
+                  Company
+                  <input v-model="exp.company" placeholder="ABC Electronics" />
+                </label>
+              </div>
+              <div class="row">
+                <label>
+                  Location
+                  <input v-model="exp.location" placeholder="Dhaka" />
+                </label>
+                <label>
+                  Dates
+                  <div class="row">
+                    <input v-model="exp.start" placeholder="2016" />
+                    <input v-model="exp.end" placeholder="2019" />
+                  </div>
+                </label>
+              </div>
+              <div class="chips">
+                <div class="chip-input">
+                  <input
+                    v-model="exp.newHighlight"
+                    placeholder="Add highlight"
+                  />
+                  <button class="btn mini" type="button" @click="addHighlight(idx)">
+                    Add
+                  </button>
+                </div>
+                <div class="chip" v-for="(h, hIdx) in exp.highlights" :key="hIdx">
+                  <span>{{ h }}</span>
+                  <button class="chip-x" type="button" @click="removeHighlight(idx, hIdx)">x</button>
+                </div>
+              </div>
+              <button class="btn mini danger" type="button" @click="removeExperience(idx)">
+                Remove Experience
+              </button>
+            </article>
+            <button class="btn ghost" type="button" @click="addExperience">
+              Add Experience
+            </button>
+          </div>
+
+          <h2>Education</h2>
+          <div class="list">
+            <article class="card" v-for="(edu, idx) in cv.education" :key="idx">
+              <div class="row">
+                <label>
+                  Degree
+                  <input v-model="edu.degree" placeholder="BSc in EEE" />
+                </label>
+                <label>
+                  School
+                  <input v-model="edu.school" placeholder="XYZ University" />
+                </label>
+              </div>
+              <div class="row">
+                <label>
+                  Location
+                  <input v-model="edu.location" placeholder="Dhaka" />
+                </label>
+                <label>
+                  Dates
+                  <div class="row">
+                    <input v-model="edu.start" placeholder="2012" />
+                    <input v-model="edu.end" placeholder="2016" />
+                  </div>
+                </label>
+              </div>
+              <div class="chips">
+                <div class="chip-input">
+                  <input v-model="edu.newDetail" placeholder="Add detail" />
+                  <button class="btn mini" type="button" @click="addEducationDetail(idx)">
+                    Add
+                  </button>
+                </div>
+                <div class="chip" v-for="(d, dIdx) in edu.details" :key="dIdx">
+                  <span>{{ d }}</span>
+                  <button class="chip-x" type="button" @click="removeEducationDetail(idx, dIdx)">x</button>
+                </div>
+              </div>
+              <button class="btn mini danger" type="button" @click="removeEducation(idx)">
+                Remove Education
+              </button>
+            </article>
+            <button class="btn ghost" type="button" @click="addEducation">
+              Add Education
+            </button>
+          </div>
+
+          <h2>Projects</h2>
+          <div class="list">
+            <article class="card" v-for="(proj, idx) in cv.projects" :key="idx">
+              <div class="row">
+                <label>
+                  Project Name
+                  <input v-model="proj.name" placeholder="CV Builder" />
+                </label>
+                <label>
+                  Link
+                  <input v-model="proj.link" placeholder="project.example" />
+                </label>
+              </div>
+              <label>
+                Description
+                <textarea v-model="proj.description" rows="3"></textarea>
+              </label>
+              <div class="chips">
+                <div class="chip-input">
+                  <input v-model="proj.newTech" placeholder="Add tech" />
+                  <button class="btn mini" type="button" @click="addProjectTech(idx)">
+                    Add
+                  </button>
+                </div>
+                <div class="chip" v-for="(t, tIdx) in proj.tech" :key="tIdx">
+                  <span>{{ t }}</span>
+                  <button class="chip-x" type="button" @click="removeProjectTech(idx, tIdx)">x</button>
+                </div>
+              </div>
+              <button class="btn mini danger" type="button" @click="removeProject(idx)">
+                Remove Project
+              </button>
+            </article>
+            <button class="btn ghost" type="button" @click="addProject">
+              Add Project
+            </button>
+          </div>
+
+          <h2>Skills</h2>
+          <div class="card">
+            <div class="skill-block">
+              <p class="label">Data and Reporting</p>
+              <div class="chips">
+                <div class="chip-input">
+                  <input v-model="skillDrafts.languages" placeholder="Add skill" />
+                  <button class="btn mini" type="button" @click="addSkill('languages')">
+                    Add
+                  </button>
+                </div>
+                <div class="chip" v-for="(s, sIdx) in cv.skills.languages" :key="sIdx">
+                  <span>{{ s }}</span>
+                  <button class="chip-x" type="button" @click="removeSkill('languages', sIdx)">x</button>
+                </div>
+              </div>
+            </div>
+            <div class="skill-block">
+              <p class="label">Digital and Communication</p>
+              <div class="chips">
+                <div class="chip-input">
+                  <input v-model="skillDrafts.frameworks" placeholder="Add skill" />
+                  <button class="btn mini" type="button" @click="addSkill('frameworks')">
+                    Add
+                  </button>
+                </div>
+                <div class="chip" v-for="(s, sIdx) in cv.skills.frameworks" :key="sIdx">
+                  <span>{{ s }}</span>
+                  <button class="chip-x" type="button" @click="removeSkill('frameworks', sIdx)">x</button>
+                </div>
+              </div>
+            </div>
+            <div class="skill-block">
+              <p class="label">Tools</p>
+              <div class="chips">
+                <div class="chip-input">
+                  <input v-model="skillDrafts.tools" placeholder="Add tool" />
+                  <button class="btn mini" type="button" @click="addSkill('tools')">
+                    Add
+                  </button>
+                </div>
+                <div class="chip" v-for="(s, sIdx) in cv.skills.tools" :key="sIdx">
+                  <span>{{ s }}</span>
+                  <button class="chip-x" type="button" @click="removeSkill('tools', sIdx)">x</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel output-panel">
+          <h2>LaTeX Preview</h2>
+          <textarea class="latex" v-model="latex" rows="18" readonly></textarea>
+          <h2>Compiler Log</h2>
+          <pre class="log">{{ logs }}</pre>
+          <h2>PDF Preview</h2>
+          <div class="pdf" v-if="pdfUrl">
+            <iframe :src="pdfUrl" title="CV PDF"></iframe>
+          </div>
+          <p v-else class="muted">Compile to see the PDF preview.</p>
+        </section>
+      </main>
+    </div>
+
+    <script id="latex-template" type="text/plain">
+\documentclass[11pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=0.7in]{geometry}
+\usepackage{titlesec}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{hyperref}
+
+\definecolor{cvaccent}{HTML}{0F4C81}
+\definecolor{cvlink}{HTML}{1B6AC9}
+
+\titleformat{\section}{\large\bfseries\color{cvaccent}}{}{0em}{}[\titlerule]
+\setlist[itemize]{noitemsep, topsep=2pt, leftmargin=1.2em}
+
+\newcommand{\cvheader}[3]{{\LARGE \textbf{#1}}\\{\large #2}\\{\small #3}}
+\newcommand{\cvsection}[1]{\section*{#1}}
+\newcommand{\cvsubheading}[4]{\textbf{#1} --- #2 \hfill #4\\{\textit{#3}}\\[-2pt]}
+\newcommand{\cvproject}[3]{\textbf{#1}\\#2\\{\small #3}}
+\newcommand{\cvskillline}[2]{\textbf{#1}: #2\\}
+
+\hypersetup{colorlinks=true, urlcolor=cvlink}
+\pagenumbering{gobble}
+\setlength{\parindent}{0pt}
+
+\begin{document}
+
+\cvheader{{{personal.name}}}{{{personal.title}}}{{{contact_line}}}
+\vspace{0.2cm}
+
+\cvsection{Professional Summary}
+{{{personal.summary}}}
+
+\cvsection{Experience}
+{{{experience_block}}}
+
+\cvsection{Education}
+{{{education_block}}}
+
+\cvsection{Projects}
+{{{projects_block}}}
+
+\cvsection{Core Skills}
+\cvskillline{Data and Reporting}{{{skills.languages}}}
+\cvskillline{Digital and Communication}{{{skills.frameworks}}}
+\cvskillline{Tools}{{{skills.tools}}}
+
+\end{document}
+    </script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="app.js?v=2"></script>
+  </body>
+</html>
