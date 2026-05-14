@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: cv-forge
+    runtime: python
+    buildCommand: "pip install --upgrade pip"
+    startCommand: "python server.py"
+    envVars:
+      - key: PORT
+        generateValue: false
+    healthCheckPath: /
