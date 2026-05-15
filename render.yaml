@@ -7,4 +7,6 @@ services:
     envVars:
       - key: PORT
         generateValue: false
+      - key: GEMINI_API_KEY
+        sync: false
     healthCheckPath: /

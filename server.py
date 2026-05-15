@@ -1,10 +1,13 @@
 """
 CVforge local server.
 - Serves static files from this directory on port 3000.
-- Proxies POST /api/compile → latexonline.cc GET ?text=, bypassing browser CORS.
+- Proxies POST /api/compile  → latexonline.cc, bypassing browser CORS.
+- Proxies POST /api/suggest  → Gemini 2.0 Flash for CV text suggestions.
 
 Run:  python server.py
 Open: http://localhost:3000
+
+Requires GEMINI_API_KEY env var for AI suggestions.
 """
 import http.server
 import urllib.request
@@ -15,6 +18,42 @@ import re
 
 PORT = int(os.environ.get("PORT", 3000))
 LATEX_API = "https://latexonline.cc/compile"
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
+GEMINI_URL = (
+    "https://generativelanguage.googleapis.com/v1beta/models"
+    "/gemini-2.0-flash:generateContent"
+)
+
+
+def build_prompt(field: str, context: dict) -> str:
+    """Build a Gemini prompt for the given CV field."""
+    if field == "summary":
+        return (
+            "You are a professional CV writer. Write a compelling 2-3 sentence "
+            "professional summary for a CV. "
+            f"Name: {context.get('name', 'the candidate')}. "
+            f"Title: {context.get('title', 'professional')}. "
+            "Make it concise, impactful, and written in first-person-free style. "
+            "Return ONLY the summary text — no preamble, no quotes."
+        )
+    if field == "highlight":
+        return (
+            "You are a professional CV writer. Suggest ONE strong, action-verb-led, "
+            "quantified bullet point for a CV experience section. "
+            f"Role: {context.get('role', '')}. "
+            f"Company: {context.get('company', '')}. "
+            "Return ONLY the bullet text (no dash or bullet symbol), no preamble."
+        )
+    if field == "description":
+        tech = ", ".join(context.get("tech", []))
+        return (
+            "You are a professional CV writer. Write a single-sentence project "
+            "description for a CV. "
+            f"Project name: {context.get('name', '')}. "
+            f"Technologies: {tech}. "
+            "Return ONLY the description text, no preamble."
+        )
+    return "Please provide a helpful professional suggestion."
 
 
 def inline_sty(tex: str, sty: str) -> str:
@@ -37,6 +76,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
     def do_POST(self):
         if self.path == "/api/compile":
             self._handle_compile()
+        elif self.path == "/api/suggest":
+            self._handle_suggest()
         else:
             self.send_error(404)
 
@@ -89,6 +130,65 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.send_header("Content-Length", str(len(msg)))
             self.end_headers()
             self.wfile.write(msg)
+
+    def _handle_suggest(self):
+        if not GEMINI_API_KEY:
+            self._json_error(503, "GEMINI_API_KEY is not configured on the server.")
+            return
+
+        length = int(self.headers.get("Content-Length", 0))
+        body = self.rfile.read(length)
+        try:
+            data = json.loads(body)
+            field = data.get("field", "")
+            context = data.get("context", {})
+        except Exception:
+            self.send_error(400, "Bad JSON")
+            return
+
+        prompt = build_prompt(field, context)
+        url = f"{GEMINI_URL}?key={GEMINI_API_KEY}"
+        payload = json.dumps({
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {"temperature": 0.7, "maxOutputTokens": 300}
+        }).encode()
+
+        print(f"  -> Gemini suggest: field={field}")
+        try:
+            req = urllib.request.Request(
+                url, data=payload,
+                headers={"Content-Type": "application/json", "User-Agent": "CVforge/1.0"}
+            )
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                result = json.loads(resp.read())
+            suggestion = result["candidates"][0]["content"]["parts"][0]["text"].strip()
+            print(f"  OK Gemini responded ({len(suggestion)} chars)")
+            self._json_response({"suggestion": suggestion})
+        except urllib.error.HTTPError as e:
+            msg = e.read().decode("utf-8", errors="replace")
+            print(f"  ERR Gemini error {e.code}: {msg[:300]}")
+            self._json_error(e.code, f"Gemini API error: {msg[:300]}")
+        except Exception as e:
+            print(f"  ERR Suggest proxy error: {e}")
+            self._json_error(502, f"Suggestion failed: {e}")
+
+    def _json_response(self, obj):
+        body = json.dumps(obj).encode()
+        self.send_response(200)
+        self._cors()
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def _json_error(self, code, message):
+        body = json.dumps({"error": message}).encode()
+        self.send_response(code)
+        self._cors()
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
 
     def _cors(self):
         self.send_header("Access-Control-Allow-Origin", "*")

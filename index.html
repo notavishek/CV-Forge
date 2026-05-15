@@ -87,6 +87,15 @@
               rows="4"
               placeholder="2-3 lines that capture your impact."
             ></textarea>
+            <button
+              class="btn ai-suggest"
+              type="button"
+              @click="suggestSummary"
+              :disabled="suggesting.summary"
+            >
+              <span v-if="!suggesting.summary">✨ AI Suggest</span>
+              <span v-else>Thinking...</span>
+            </button>
           </label>
 
           <h2>Experience</h2>
@@ -123,6 +132,16 @@
                   />
                   <button class="btn mini" type="button" @click="addHighlight(idx)">
                     Add
+                  </button>
+                  <button
+                    class="btn mini ai-suggest"
+                    type="button"
+                    @click="suggestHighlight(idx)"
+                    :disabled="suggesting[`highlight-${idx}`]"
+                    title="AI suggest a highlight"
+                  >
+                    <span v-if="!suggesting[`highlight-${idx}`]">✨</span>
+                    <span v-else>...</span>
                   </button>
                 </div>
                 <div class="chip" v-for="(h, hIdx) in exp.highlights" :key="hIdx">
@@ -202,6 +221,15 @@
               <label>
                 Description
                 <textarea v-model="proj.description" rows="3"></textarea>
+                <button
+                  class="btn ai-suggest"
+                  type="button"
+                  @click="suggestDescription(idx)"
+                  :disabled="suggesting[`desc-${idx}`]"
+                >
+                  <span v-if="!suggesting[`desc-${idx}`]">✨ AI Suggest</span>
+                  <span v-else>Thinking...</span>
+                </button>
               </label>
               <div class="chips">
                 <div class="chip-input">

@@ -229,7 +229,8 @@ createApp({
       pdfUrl: "",
       skillDrafts: {
         languages: ""
-      }
+      },
+      suggesting: {}
     };
   },
   async mounted() {
@@ -335,6 +336,62 @@ createApp({
     },
     removeSkill(group, index) {
       this.cv.skills[group].splice(index, 1);
+    },
+    async _callSuggest(field, context) {
+      const res = await fetch("/api/suggest", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ field, context })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Suggestion failed");
+      return data.suggestion;
+    },
+    async suggestSummary() {
+      this.suggesting = { ...this.suggesting, summary: true };
+      try {
+        const text = await this._callSuggest("summary", {
+          name: this.cv.personal.name,
+          title: this.cv.personal.title
+        });
+        this.cv.personal.summary = text;
+      } catch (e) {
+        console.error("Suggest summary:", e);
+      } finally {
+        this.suggesting = { ...this.suggesting, summary: false };
+      }
+    },
+    async suggestHighlight(idx) {
+      const key = `highlight-${idx}`;
+      this.suggesting = { ...this.suggesting, [key]: true };
+      const exp = this.cv.experience[idx];
+      try {
+        const text = await this._callSuggest("highlight", {
+          role: exp.role,
+          company: exp.company
+        });
+        exp.newHighlight = text;
+      } catch (e) {
+        console.error("Suggest highlight:", e);
+      } finally {
+        this.suggesting = { ...this.suggesting, [key]: false };
+      }
+    },
+    async suggestDescription(idx) {
+      const key = `desc-${idx}`;
+      this.suggesting = { ...this.suggesting, [key]: true };
+      const proj = this.cv.projects[idx];
+      try {
+        const text = await this._callSuggest("description", {
+          name: proj.name,
+          tech: proj.tech
+        });
+        proj.description = text;
+      } catch (e) {
+        console.error("Suggest description:", e);
+      } finally {
+        this.suggesting = { ...this.suggesting, [key]: false };
+      }
     },
     async compilePdf() {
       if (!this.templateTex) return;
