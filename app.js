@@ -403,15 +403,46 @@ createApp({
     removeReference(index) {
       this.cv.references.splice(index, 1);
     },
+    _buildPrompt(field, context) {
+      if (field === "summary") {
+        return (
+          `Write a concise 2-3 sentence professional summary for a CV. ` +
+          `Name: ${context.name || "the applicant"}. Title: ${context.title || "a professional"}. ` +
+          `Return only the summary text, no quotes or preamble.`
+        );
+      }
+      if (field === "highlight") {
+        return (
+          `Write a single concise CV bullet-point for this experience. ` +
+          `Role: ${context.role || "unknown"}. Company: ${context.company || "unknown"}. ` +
+          `Start with a strong action verb. Return only the bullet text.`
+        );
+      }
+      if (field === "description") {
+        const tech = Array.isArray(context.tech) ? context.tech.join(", ") : "";
+        return (
+          `Write a concise one-sentence project description for a CV. ` +
+          `Project: ${context.name || "a project"}. Tech: ${tech}. ` +
+          `Return only the description text.`
+        );
+      }
+      return `Provide a professional CV text suggestion for: ${field}.`;
+    },
     async _callSuggest(field, context) {
-      const res = await fetch("/api/suggest", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ field, context })
-      });
+      const GEMINI_KEY = "AIzaSyD4LUdcLZ2Xmklsec-xS-LumsW2Z-jCmXM";
+      const GEMINI_MODEL = "gemini-2.5-flash";
+      const prompt = this._buildPrompt(field, context);
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_KEY}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        }
+      );
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Suggestion failed");
-      return data.suggestion;
+      if (!res.ok) throw new Error(data.error?.message || "Suggestion failed");
+      return data.candidates[0].content.parts[0].text.trim();
     },
     async suggestSummary() {
       this.suggesting = { ...this.suggesting, summary: true };
