@@ -252,6 +252,64 @@
             </button>
           </div>
 
+          <h2>Certifications</h2>
+          <div class="list">
+            <article class="card" v-for="(cert, idx) in cv.certificates" :key="idx">
+              <div class="row">
+                <label>
+                  Certificate Name
+                  <input v-model="cert.name" placeholder="AWS Solutions Architect" />
+                </label>
+                <label>
+                  Issuer
+                  <input v-model="cert.issuer" placeholder="Amazon Web Services" />
+                </label>
+              </div>
+              <label>
+                Date
+                <input v-model="cert.date" placeholder="2024" />
+              </label>
+              <button class="btn mini danger" type="button" @click="removeCertificate(idx)">
+                Remove
+              </button>
+            </article>
+            <button class="btn ghost" type="button" @click="addCertificate">Add Certificate</button>
+          </div>
+
+          <h2>References</h2>
+          <div class="list">
+            <article class="card" v-for="(ref, idx) in cv.references" :key="idx">
+              <div class="row">
+                <label>
+                  Full Name
+                  <input v-model="ref.name" placeholder="Dr. John Smith" />
+                </label>
+                <label>
+                  Title / Position
+                  <input v-model="ref.title" placeholder="Senior Professor" />
+                </label>
+              </div>
+              <div class="row">
+                <label>
+                  Organization
+                  <input v-model="ref.organization" placeholder="XYZ University" />
+                </label>
+                <label>
+                  Email
+                  <input v-model="ref.email" placeholder="john@example.com" />
+                </label>
+              </div>
+              <label>
+                Phone
+                <input v-model="ref.phone" placeholder="+880 1234567890" />
+              </label>
+              <button class="btn mini danger" type="button" @click="removeReference(idx)">
+                Remove
+              </button>
+            </article>
+            <button class="btn ghost" type="button" @click="addReference">Add Reference</button>
+          </div>
+
           <h2>Skills</h2>
           <div class="card">
             <div class="chips">
@@ -314,24 +372,23 @@
 \cvheader{{{personal.name}}}{{{personal.title}}}{{{contact_line}}}
 \vspace{0.2cm}
 
-\cvsection{Professional Summary}
-{{{personal.summary}}}
+{{{summary_section}}}
 
-\cvsection{Experience}
-{{{experience_block}}}
+{{{experience_section}}}
 
-\cvsection{Education}
-{{{education_block}}}
+{{{education_section}}}
 
-\cvsection{Projects}
-{{{projects_block}}}
+{{{projects_section}}}
 
-\cvsection{Core Skills}
-{{{skills.languages}}}
+{{{skills_section}}}
+
+{{{certificates_section}}}
+
+{{{references_section}}}
 
 \end{document}
     </script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
-    <script src="app.js?v=2"></script>
+    <script src="app.js?v=3"></script>
   </body>
 </html>

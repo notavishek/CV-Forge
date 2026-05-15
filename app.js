@@ -15,7 +15,9 @@ const DEFAULT_CV = {
   skills: {
     languages: []
   },
-  projects: []
+  projects: [],
+  certificates: [],
+  references: []
 };
 
 const COMPILE_TIMEOUT_MS = 60000;
@@ -130,7 +132,52 @@ function buildProjectsBlock(projects) {
     .join("\n\n");
 }
 
+function buildSection(title, content) {
+  if (!content || !content.trim()) return "";
+  return `\\cvsection{${title}}\n${content}`;
+}
+
+function buildCertificatesBlock(certificates) {
+  return (certificates || [])
+    .map((c) => {
+      if (!c.name) return "";
+      const meta = [escapeLatex(c.issuer), escapeLatex(c.date)]
+        .filter(Boolean)
+        .join(", ");
+      return `\\textbf{${escapeLatex(c.name)}}${meta ? ` --- ${meta}` : ""}`;
+    })
+    .filter(Boolean)
+    .join("\\\\[2pt]\n");
+}
+
+function buildReferencesBlock(references) {
+  return (references || [])
+    .map((r) => {
+      if (!r.name) return "";
+      const titleOrg = [escapeLatex(r.title), escapeLatex(r.organization)]
+        .filter(Boolean)
+        .join(", ");
+      const contact = [
+        r.email
+          ? `\\href{mailto:${escapeLatex(r.email)}}{${escapeLatex(r.email)}}`
+          : "",
+        r.phone ? escapeLatex(r.phone) : ""
+      ]
+        .filter(Boolean)
+        .join(" \\quad ");
+      const lines = [
+        `\\textbf{${escapeLatex(r.name)}}${titleOrg ? `, ${titleOrg}` : ""}`
+      ];
+      if (contact) lines.push(contact);
+      return lines.join("\\\\\n");
+    })
+    .filter(Boolean)
+    .join("\\\\[4pt]\n");
+}
+
 function renderTemplate(template, cv) {
+  const skillsList = (cv.skills.languages || []).map(escapeLatex).join(", ");
+
   const view = {
     personal: {
       name: escapeLatex(cv.personal.name),
@@ -143,13 +190,19 @@ function renderTemplate(template, cv) {
       github: escapeLatex(cv.personal.github),
       summary: escapeLatexMultiline(cv.personal.summary)
     },
-    skills: {
-      languages: (cv.skills.languages || []).map(escapeLatex).join(", ")
-    },
     contact_line: buildContactLine(cv.personal),
-    experience_block: buildExperienceBlock(cv.experience),
-    education_block: buildEducationBlock(cv.education),
-    projects_block: buildProjectsBlock(cv.projects)
+    // Conditional sections — empty string if no content
+    summary_section: cv.personal.summary.trim()
+      ? `\\cvsection{Professional Summary}\n${escapeLatexMultiline(cv.personal.summary)}`
+      : "",
+    experience_section: buildSection("Experience", buildExperienceBlock(cv.experience)),
+    education_section: buildSection("Education", buildEducationBlock(cv.education)),
+    projects_section: buildSection("Projects", buildProjectsBlock(cv.projects)),
+    skills_section: skillsList
+      ? `\\cvsection{Core Skills}\n${skillsList}`
+      : "",
+    certificates_section: buildSection("Certifications", buildCertificatesBlock(cv.certificates)),
+    references_section: buildSection("References", buildReferencesBlock(cv.references))
   };
 
   return template.replace(/\{\{([a-zA-Z0-9_.]+)\}\}/g, (_, key) => {
@@ -336,6 +389,18 @@ createApp({
     },
     removeSkill(group, index) {
       this.cv.skills[group].splice(index, 1);
+    },
+    addCertificate() {
+      this.cv.certificates.push({ name: "", issuer: "", date: "" });
+    },
+    removeCertificate(index) {
+      this.cv.certificates.splice(index, 1);
+    },
+    addReference() {
+      this.cv.references.push({ name: "", title: "", organization: "", email: "", phone: "" });
+    },
+    removeReference(index) {
+      this.cv.references.splice(index, 1);
     },
     async _callSuggest(field, context) {
       const res = await fetch("/api/suggest", {
