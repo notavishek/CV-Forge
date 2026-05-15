@@ -283,7 +283,8 @@ createApp({
       skillDrafts: {
         languages: ""
       },
-      suggesting: {}
+      suggesting: {},
+      suggestError: ""
     };
   },
   async mounted() {
@@ -414,6 +415,7 @@ createApp({
     },
     async suggestSummary() {
       this.suggesting = { ...this.suggesting, summary: true };
+      this.suggestError = "";
       try {
         const text = await this._callSuggest("summary", {
           name: this.cv.personal.name,
@@ -421,7 +423,8 @@ createApp({
         });
         this.cv.personal.summary = text;
       } catch (e) {
-        console.error("Suggest summary:", e);
+        this.suggestError = e.message || "AI suggestion failed.";
+        setTimeout(() => { this.suggestError = ""; }, 5000);
       } finally {
         this.suggesting = { ...this.suggesting, summary: false };
       }
@@ -429,6 +432,7 @@ createApp({
     async suggestHighlight(idx) {
       const key = `highlight-${idx}`;
       this.suggesting = { ...this.suggesting, [key]: true };
+      this.suggestError = "";
       const exp = this.cv.experience[idx];
       try {
         const text = await this._callSuggest("highlight", {
@@ -437,7 +441,8 @@ createApp({
         });
         exp.newHighlight = text;
       } catch (e) {
-        console.error("Suggest highlight:", e);
+        this.suggestError = e.message || "AI suggestion failed.";
+        setTimeout(() => { this.suggestError = ""; }, 5000);
       } finally {
         this.suggesting = { ...this.suggesting, [key]: false };
       }
@@ -445,6 +450,7 @@ createApp({
     async suggestDescription(idx) {
       const key = `desc-${idx}`;
       this.suggesting = { ...this.suggesting, [key]: true };
+      this.suggestError = "";
       const proj = this.cv.projects[idx];
       try {
         const text = await this._callSuggest("description", {
@@ -453,7 +459,8 @@ createApp({
         });
         proj.description = text;
       } catch (e) {
-        console.error("Suggest description:", e);
+        this.suggestError = e.message || "AI suggestion failed.";
+        setTimeout(() => { this.suggestError = ""; }, 5000);
       } finally {
         this.suggesting = { ...this.suggesting, [key]: false };
       }

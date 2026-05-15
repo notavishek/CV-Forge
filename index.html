@@ -10,6 +10,7 @@
   <body>
     <div class="ambient" aria-hidden="true"></div>
     <div id="app" class="app">
+      <div v-if="suggestError" class="toast-error">⚠️ {{ suggestError }}</div>
       <header class="hero">
         <div>
           <p class="eyebrow">LaTeX Online Compiler</p>
