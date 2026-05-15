@@ -21,7 +21,7 @@ LATEX_API = "https://latexonline.cc/compile"
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 GEMINI_URL = (
     "https://generativelanguage.googleapis.com/v1beta/models"
-    "/gemini-2.0-flash-lite:generateContent"
+    "/gemini-2.5-flash:generateContent"
 )
 
 
@@ -166,8 +166,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._json_response({"suggestion": suggestion})
         except urllib.error.HTTPError as e:
             msg = e.read().decode("utf-8", errors="replace")
-            print(f"  ERR Gemini error {e.code}: {msg[:300]}")
-            self._json_error(e.code, f"Gemini API error: {msg[:300]}")
+            print(f"  ERR Gemini error {e.code}: {msg[:2000]}")
+            self._json_error(e.code, f"Gemini API error: {msg[:2000]}")
         except Exception as e:
             print(f"  ERR Suggest proxy error: {e}")
             self._json_error(502, f"Suggestion failed: {e}")
