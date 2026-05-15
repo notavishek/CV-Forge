@@ -104,44 +104,13 @@ Navigate to **[http://localhost:3000](http://localhost:3000)**
 
 ---
 
-## ☁️ Deploy on Render
+## 🌐 Live Demo
 
-CV Forge can be deployed as a public web service on [Render](https://render.com) with zero configuration — the `render.yaml` in the repo handles everything.
+CV Forge is already deployed and available at:
 
-### One-time Setup
+🔗 **[https://cv-forge-lvog.onrender.com](https://cv-forge-lvog.onrender.com)**
 
-1. Go to [render.com](https://render.com) and sign in
-2. Click **New → Web Service**
-3. Connect your GitHub account and select the `CV-Forge` repository
-4. Render will auto-detect `render.yaml` and pre-fill all settings:
-
-| Field | Value |
-|---|---|
-| **Runtime** | Python 3 |
-| **Build Command** | `pip install --upgrade pip` |
-| **Start Command** | `python server.py` |
-| **Instance Type** | Free |
-
-5. Skip the **Environment Variables** section — `PORT` is injected automatically by Render
-6. Click **Create Web Service**
-
-Your app will be live at `https://cv-forge-xxxx.onrender.com` within a couple of minutes.
-
-### Auto-Deploy on Push
-
-Every time you push to the `main` branch, Render automatically redeploys:
-
-```
-git add .
-git commit -m "your changes"
-git push  →  Render detects push  →  Rebuilds & restarts  →  Live in ~1–2 min
-```
-
-### ⚠️ Free Tier — Cold Start
-
-On the free plan, the service **spins down after ~15 minutes of inactivity**. The next visitor will experience a ~30–50 second cold start. Upgrade to a paid plan ($7/mo) to keep it always-on.
-
-🔗 **Live app:** [https://cv-forge-lvog.onrender.com](https://cv-forge-lvog.onrender.com)
+> ⚠️ Hosted on Render's free tier — the app may take ~30–50 seconds to load after a period of inactivity (cold start).
 
 ---
 
