@@ -28,8 +28,11 @@
 - **One-click PDF compilation** — proxied through a local Python server to bypass browser CORS restrictions
 - **In-browser PDF preview** — compiled PDF is rendered inline via an `<iframe>`
 - **Download PDF** — save the finished CV with a single click
+- **AI Text Suggestions** — ✨ AI Suggest buttons powered by Gemini generate professional summaries, experience highlights, and project descriptions
+- **6 CV sections** — Personal, Experience, Education, Projects, Certifications, References
+- **Conditional section rendering** — sections with no content are automatically omitted from the compiled PDF
 - **No third-party dependencies** — the Python server uses the standard library only (`http.server`, `urllib`)
-- **Fully customisable LaTeX template** — edit `template.tex` or the embedded template in `index.html` to change the CV layout
+- **Fully customisable LaTeX template** — edit the embedded template in `index.html` to change the CV layout
 - **Clean slate on load** — all form fields start blank; placeholder text guides the user
 
 ---
@@ -161,12 +164,14 @@ The LaTeX template lives in two places:
 | `{{personal.website}}` | Portfolio / personal website URL |
 | `{{personal.linkedin}}` | LinkedIn profile URL |
 | `{{personal.github}}` | GitHub profile URL |
-| `{{personal.summary}}` | Professional summary paragraph |
 | `{{contact_line}}` | Auto-built contact line (email · phone · location · links) |
-| `{{experience_block}}` | Full experience section (rendered LaTeX) |
-| `{{education_block}}` | Full education section (rendered LaTeX) |
-| `{{projects_block}}` | Full projects section (rendered LaTeX) |
-| `{{skills.languages}}` | Comma-separated list of all skills |
+| `{{summary_section}}` | Professional summary — **omitted if empty** |
+| `{{experience_section}}` | Full experience section — **omitted if no entries** |
+| `{{education_section}}` | Full education section — **omitted if no entries** |
+| `{{projects_section}}` | Full projects section — **omitted if no entries** |
+| `{{skills_section}}` | Core skills — **omitted if no skills added** |
+| `{{certificates_section}}` | Certifications — **omitted if no entries** |
+| `{{references_section}}` | References — **omitted if no entries** |
 
 ### Custom LaTeX Commands (from `cv.sty`)
 
