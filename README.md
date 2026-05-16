@@ -111,7 +111,7 @@ Navigate to **[http://localhost:3000](http://localhost:3000)**
 
 CV Forge is already deployed and available at:
 
-🔗 **[https://cv-forge-lvog.onrender.com](https://www.cvforge.pro.bd/)**
+🔗 **[https://www.cvforge.pro.bd/](https://www.cvforge.pro.bd/)**
 
 > ⚠️ Hosted on Render's free tier — the app may take ~30–50 seconds to load after a period of inactivity (cold start).
 
