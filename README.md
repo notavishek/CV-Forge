@@ -3,7 +3,7 @@
   <h1>CV Forge</h1>
   <p><strong>A browser-based LaTeX CV builder with server-side PDF compilation.</strong></p>
   <p>
-    <a href="https://cv-forge-lvog.onrender.com" target="_blank">
+    <a href="https://www.cvforge.pro.bd/" target="_blank">
       <img src="https://img.shields.io/badge/Live%20Demo-%F0%9F%9A%80-46E3B7?style=for-the-badge" />
     </a>
   </p>
