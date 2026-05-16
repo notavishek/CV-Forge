@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="CV forge logo.png" alt="CV Forge Logo" width="120" />
+  <img src="assets/logo/CV forge logo.png" alt="CV Forge Logo" width="120" />
   <h1>CV Forge</h1>
   <p><strong>A browser-based LaTeX CV builder with server-side PDF compilation.</strong></p>
   <p>
@@ -61,7 +61,7 @@ CV-Forge/
 ├── template.tex        # Standalone LaTeX template (used as fallback if inline template is removed)
 ├── requirements.txt    # No pip dependencies (stdlib only)
 ├── schema.json         # CV data schema reference
-├── CV forge logo.png   # Application logo
+├── assets/logo/CV forge logo.png   # Application logo
 ├── assets/
 │   ├── fonts/          # Inter font family (18pt, 24pt, 28pt — all weights)
 │   └── styles/
