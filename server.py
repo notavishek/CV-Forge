@@ -2,12 +2,12 @@
 CVforge local server.
 - Serves static files from this directory on port 3000.
 - Proxies POST /api/compile  → latexonline.cc, bypassing browser CORS.
-- Proxies POST /api/suggest  → Gemini 2.0 Flash for CV text suggestions.
+- Proxies POST /api/suggest  → Groq (Llama 3.3) for CV text suggestions.
 
 Run:  python server.py
 Open: http://localhost:3000
 
-Requires GEMINI_API_KEY env var for AI suggestions.
+Requires GROQ_API_KEY env var for AI suggestions.
 """
 import http.server
 import urllib.request
@@ -18,15 +18,13 @@ import re
 
 PORT = int(os.environ.get("PORT", 3000))
 LATEX_API = "https://latexonline.cc/compile"
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
-GEMINI_URL = (
-    "https://generativelanguage.googleapis.com/v1beta/models"
-    "/gemini-2.0-flash:generateContent"
-)
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
+GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
+GROQ_MODEL = "llama-3.3-70b-versatile"
 
 
 def build_prompt(field: str, context: dict) -> str:
-    """Build a Gemini prompt for the given CV field."""
+    """Build a Groq/Llama prompt for the given CV field."""
     if field == "summary":
         return (
             "You are a professional CV writer. Write a compelling 2-3 sentence "
@@ -132,8 +130,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(msg)
 
     def _handle_suggest(self):
-        if not GEMINI_API_KEY:
-            self._json_error(503, "GEMINI_API_KEY is not configured on the server.")
+        if not GROQ_API_KEY:
+            self._json_error(503, "GROQ_API_KEY is not configured on the server.")
             return
 
         length = int(self.headers.get("Content-Length", 0))
@@ -147,27 +145,32 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             return
 
         prompt = build_prompt(field, context)
-        url = f"{GEMINI_URL}?key={GEMINI_API_KEY}"
         payload = json.dumps({
-            "contents": [{"parts": [{"text": prompt}]}],
-            "generationConfig": {"temperature": 0.7, "maxOutputTokens": 300}
+            "model": GROQ_MODEL,
+            "messages": [{"role": "user", "content": prompt}],
+            "max_tokens": 300,
+            "temperature": 0.7
         }).encode()
 
-        print(f"  -> Gemini suggest: field={field}")
+        print(f"  -> Groq suggest: field={field}")
         try:
             req = urllib.request.Request(
-                url, data=payload,
-                headers={"Content-Type": "application/json", "User-Agent": "CVforge/1.0"}
+                GROQ_URL, data=payload,
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {GROQ_API_KEY}",
+                    "User-Agent": "CVforge/1.0"
+                }
             )
             with urllib.request.urlopen(req, timeout=30) as resp:
                 result = json.loads(resp.read())
-            suggestion = result["candidates"][0]["content"]["parts"][0]["text"].strip()
-            print(f"  OK Gemini responded ({len(suggestion)} chars)")
+            suggestion = result["choices"][0]["message"]["content"].strip()
+            print(f"  OK Groq responded ({len(suggestion)} chars)")
             self._json_response({"suggestion": suggestion})
         except urllib.error.HTTPError as e:
             msg = e.read().decode("utf-8", errors="replace")
-            print(f"  ERR Gemini error {e.code}: {msg[:2000]}")
-            self._json_error(e.code, f"Gemini API error: {msg[:2000]}")
+            print(f"  ERR Groq error {e.code}: {msg[:500]}")
+            self._json_error(e.code, f"AI API error: {msg[:500]}")
         except Exception as e:
             print(f"  ERR Suggest proxy error: {e}")
             self._json_error(502, f"Suggestion failed: {e}")
