@@ -65,19 +65,26 @@ function bulletList(items) {
   return `\\begin{itemize}\n${rows}\n\\end{itemize}`;
 }
 
+function cleanUrl(url) {
+  // Strip protocol and www. for display, keep full URL for href
+  return String(url || "")
+    .replace(/^https?:\/\//i, "")
+    .replace(/^www\./i, "");
+}
+
 function buildContactLine(personal) {
   const left = [personal.email, personal.phone, personal.location]
     .filter(Boolean)
     .map(escapeLatex);
   const right = [
     personal.website
-      ? `\\href{${escapeLatex(personal.website)}}{${escapeLatex(personal.website)}}`
+      ? `\\href{${escapeLatex(personal.website)}}{${escapeLatex(cleanUrl(personal.website))}}`
       : "",
     personal.linkedin
-      ? `\\href{${escapeLatex(personal.linkedin)}}{${escapeLatex(personal.linkedin)}}`
+      ? `\\href{${escapeLatex(personal.linkedin)}}{${escapeLatex(cleanUrl(personal.linkedin))}}`
       : "",
     personal.github
-      ? `\\href{${escapeLatex(personal.github)}}{${escapeLatex(personal.github)}}`
+      ? `\\href{${escapeLatex(personal.github)}}{${escapeLatex(cleanUrl(personal.github))}}`
       : ""
   ].filter(Boolean);
 
