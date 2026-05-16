@@ -429,20 +429,14 @@ createApp({
       return `Provide a professional CV text suggestion for: ${field}.`;
     },
     async _callSuggest(field, context) {
-      const GEMINI_KEY = "AIzaSyD4LUdcLZ2Xmklsec-xS-LumsW2Z-jCmXM";
-      const GEMINI_MODEL = "gemini-2.5-flash";
-      const prompt = this._buildPrompt(field, context);
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_KEY}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-        }
-      );
+      const res = await fetch("/api/suggest", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ field, context })
+      });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error?.message || "Suggestion failed");
-      return data.candidates[0].content.parts[0].text.trim();
+      if (!res.ok) throw new Error(data.error || "Suggestion failed");
+      return data.suggestion;
     },
     async suggestSummary() {
       this.suggesting = { ...this.suggesting, summary: true };
